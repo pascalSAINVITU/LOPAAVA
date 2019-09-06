@@ -2,15 +2,15 @@
 Last Or Popular AA Versions Available
 
 ## to add your AA as a new entry or to update with a new version:
-* 'register' = <aa name> 
-* 'address' = <aa address> . 
+* 'register' = '<aa name>' 
+* 'address' = '<aa address>'
   
 ## to give your opinion on a version of an AA (you need to be attested by the real name attestor)
-* '(dis)like' = <aa name>
-* 'version' = <version>
+* '(dis)like' = '<aa name>'
+* 'version' = '<version>'
   
 
-{ 
+${ 
 	/*
 	Check in explorer: https://testnetexplorer.obyte.org/#uTulONqpLeCW8dkAAGHl51Fy9GjAX1Ucu3MmtkV9toE=
     Agent address: 75KDQ5KTLGH5R552RG6JJQGYEMZAU4GG
