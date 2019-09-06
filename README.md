@@ -10,7 +10,7 @@ Last Or Popular AA Versions Available
 * 'version' = '<version>'
   
 
-${ 
+	{ 
 	/*
 	Check in explorer: https://testnetexplorer.obyte.org/#uTulONqpLeCW8dkAAGHl51Fy9GjAX1Ucu3MmtkV9toE=
     Agent address: 75KDQ5KTLGH5R552RG6JJQGYEMZAU4GG
