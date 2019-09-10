@@ -1,5 +1,6 @@
 # LOPAAVA
 Last Or Popular AA Versions Available
+If you want to use a secondary AA which do not need to be trustless you can keep your AA up to date, by using LOPAAVA to get the last version or the most popular version of a secondary AA.
 
 ## to add your AA as a new entry or to update with a new version:
 * 'register' = < aa name >
@@ -9,8 +10,7 @@ Last Or Popular AA Versions Available
 * '(dis)like' = < aa name >
 * 'version' = < version >
 
-## to use LOPAAVA from another AA $LOPAAVA = "T7425FEZWTHDDYD42KPRZOFALEMVX25N";
-* $AA_NAME_address = var[$LOPAAVA][<AA_NAME>_popular_version];
-* $AA_NAME_address = var[$LOPAAVA][<AA_NAME>_last_version];
-  
-
+## to use LOPAAVA from another AA:
+$LOPAAVA = "K6XFY4PODYMWPUELDOYG6UOJ3GQLMDMT";
+* $needed_aa_address = var[$LOPAAVA][<AA_NAME>_popular_version];
+* $needed_aa_address = var[$LOPAAVA][<AA_NAME>_last_version];
