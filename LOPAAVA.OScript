@@ -4,6 +4,8 @@ Check in explorer: https://testnetexplorer.obyte.org/#LHjU6zcw3I5ZqTbE7STsPaXFSk
 Agent address: K6XFY4PODYMWPUELDOYG6UOJ3GQLMDMT
 Check in explorer: https://testnetexplorer.obyte.org/#ls1kHBFvateYgseifLkVZTUz2mG65b/OqderNbqTX+o=
 Agent address: YICOQCAWUSFBIQGBB4HUPQ23U37RA5WG
+Check in explorer: https://testnetexplorer.obyte.org/#oPhB+rb8yme5h9pPHBV/PYt3bwLdij543ezWepk1EsY=
+Agent address: RDTLUKWZOU6LWHYU7XJ6ZOR4RIGVB5LC
 */
 	bounce_fees: { // bounce fees declarations
 		base: 10000 
@@ -16,13 +18,16 @@ Agent address: YICOQCAWUSFBIQGBB4HUPQ23U37RA5WG
 			$ATTESTATOR = '35IT3ZYKEPQSCXG2F7A7KWNRAD3SZXN4';
 			
 		// see all possible inputs here:
-			$i = trigger.data;
-			$register = $i.register;                     $aa_address = $i.address;
-			$like = $i.like; $dislike = $i.dislike;      $aa_version = $i.version;
-			$need_help = $i.help otherwise $i.h;
+			$register = trigger.data.register;                 
+            $aa_address = trigger.data.address;
+			$like = trigger.data.like; 
+            $dislike = trigger.data.dislike;      
+            $aa_version = trigger.data.version;
+			$need_help = trigger.data.help otherwise trigger.data.h;
 			
 		// define var that are use in each use cases
-			$name = $i.register otherwise $i.like otherwise $i.dislike otherwise bounce ($INSTRUCTIONS);
+			$name = trigger.data.register otherwise trigger.data.like otherwise trigger.data.dislike otherwise
+                bounce ($INSTRUCTIONS);
 			$key = $name||"_";
 			$popular_version = var[$key||"popular_version"];
 			$popular_version_number = var[$key||"popular_version_number"];
@@ -34,8 +39,9 @@ Agent address: YICOQCAWUSFBIQGBB4HUPQ23U37RA5WG
 					if (!!var[$key||"owner"])
 						if (var[$key||"owner"] != trigger.address)
 							bounce ("You are not the owner !");
-					if (!$aa_address) bounce ("Please specify 'address' !");		
-					$version = var[$key||"popular_version_number"] + 1 otherwise 1;
+					if (!$aa_address) 
+                        bounce ("Please specify 'address' !");		
+					$version = var[$key||"popular_last_number"] + 1 otherwise 1;
 				}",
 				messages: [
 					{ 
