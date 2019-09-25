@@ -6,6 +6,8 @@ Check in explorer: https://testnetexplorer.obyte.org/#ls1kHBFvateYgseifLkVZTUz2m
 Agent address: YICOQCAWUSFBIQGBB4HUPQ23U37RA5WG
 Check in explorer: https://testnetexplorer.obyte.org/#oPhB+rb8yme5h9pPHBV/PYt3bwLdij543ezWepk1EsY=
 Agent address: RDTLUKWZOU6LWHYU7XJ6ZOR4RIGVB5LC
+Check in explorer: https://testnetexplorer.obyte.org/#QG9S44TjIthhDiXh+JU9ZmjZ7J+6r/KuoHspxAyMNEM=
+Agent address: ZZVAKHT4PHCHGM5HAKVTJIQQ5GJJGGSQ
 */
 	bounce_fees: { // bounce fees declarations
 		base: 10000 
