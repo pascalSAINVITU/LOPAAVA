@@ -2,79 +2,103 @@
 /*
 Check in explorer: https://testnetexplorer.obyte.org/#LHjU6zcw3I5ZqTbE7STsPaXFSkDO6MRage6x3f0lE+E=
 Agent address: K6XFY4PODYMWPUELDOYG6UOJ3GQLMDMT
-Check in explorer: https://testnetexplorer.obyte.org/#ls1kHBFvateYgseifLkVZTUz2mG65b/OqderNbqTX+o=
-Agent address: YICOQCAWUSFBIQGBB4HUPQ23U37RA5WG
-Check in explorer: https://testnetexplorer.obyte.org/#oPhB+rb8yme5h9pPHBV/PYt3bwLdij543ezWepk1EsY=
-Agent address: RDTLUKWZOU6LWHYU7XJ6ZOR4RIGVB5LC
-Check in explorer: https://testnetexplorer.obyte.org/#QG9S44TjIthhDiXh+JU9ZmjZ7J+6r/KuoHspxAyMNEM=
-Agent address: ZZVAKHT4PHCHGM5HAKVTJIQQ5GJJGGSQ
+
+Check in explorer: https://testnetexplorer.obyte.org/#nlT50LKTrkrXcAGyYCsfbxrPY3glHxdDc436lN7Z2So=
+Agent address: XC4CZPEWWPQMYSIQH33I7FSRGC6YYGIN
 */
 	bounce_fees: { // bounce fees declarations
 		base: 10000 
 	},
 	init: "{ 
-		// forever constantes
+		// general instruction to bounce when no inputs are set yet
 			$INSTRUCTIONS = "Please use 'register = <aa name>'' + 'address = <aa address>' to add your AA as a new entry or to update with a new version. Please use '(dis)like' = <aa name> + 'version' = <version> to give your opinion on a version of an AA (you need to be attested by the real name attestor).!";
-
-			$AA_OWNER = "O7NYCFUL5XIJTYE3O4MKGMGMTN6ATQAJ";
+		// we need an attestor to avoid that scammers vote multiple times by changing addresses
 			$ATTESTATOR = '35IT3ZYKEPQSCXG2F7A7KWNRAD3SZXN4';
-			
-		// see all possible inputs here:
-			$register = trigger.data.register;                 
-            $aa_address = trigger.data.address;
-			$like = trigger.data.like; 
-            $dislike = trigger.data.dislike;      
-            $aa_version = trigger.data.version;
-			$need_help = trigger.data.help otherwise trigger.data.h;
+
+		// address of secondary AA to store the addresses of voters to avoid multiple votes
+			$HOLLAA = "YNB262XRUZYZTG5YSTS4QCWE4C6ZEEP2";
 			
 		// define var that are use in each use cases
 			$name = trigger.data.register otherwise trigger.data.like otherwise trigger.data.dislike otherwise
                 bounce ($INSTRUCTIONS);
-			$key = $name||"_";
-			$popular_version = var[$key||"popular_version"];
-			$popular_version_number = var[$key||"popular_version_number"];
+			$popular_version_number = var[$name||"_"||"popular_version_number"];
 	}",
-	messages: { // template for the AA's response transaction
+	messages: { 
 		cases: [ // selection of your AA functionnality/use cases
-			{ if: "{ !!$register }",
+			{ if: "{ !!trigger.data.register }", // use to register an AA address to a given name
 				init: "{ 
-					if (!!var[$key||"owner"])
-						if (var[$key||"owner"] != trigger.address)
-							bounce ("You are not the owner !");
-					if (!$aa_address) 
-                        bounce ("Please specify 'address' !");		
-					$version = var[$key||"last_version_number"] + 1 otherwise 1;
+					// if the name is already existing, you must be owner to update it with  a new version
+						if (!!var[$name||"_owner"])
+							if (var[$name||"_owner"] != trigger.address)
+								bounce ("You are not the owner !");
+					// aa address must be provided
+						if (!trigger.data.address) 
+							bounce ("Please specify 'address' !");	
+					// check that the address is really an AA address
+						if (!is_aa(trigger.data.address))
+							bounce ("The address must the address of confirmed AA !");
+					// in case of update, we increase the version number, otherwise we start with version 1
+						$version_number = var[$name||"_last_version_number"] + 1 otherwise 1;
+					// get  AA version full name
+						$version_name =  $name||"_"||$version_number;
 				}",
 				messages: [
+					 { // send info to HOLLAA to store the list of voters
+                        app: 'data', payload: {
+                            list_name: `{ $voted_version_name||"_voters" }`,
+                            add: `{ trigger.address }`, value: `{ "+1" }`
+                        },
+                    },
+                    { 
+						app: 'payment', payload: { asset: "base", outputs: [    
+							// bounce max money, thanks for registering 
+								{ address: "{trigger.address}",  amount: "{ trigger.output[[asset=base]]-2000 }" },
+							// give money to HOLLA to store the voters
+								{ address: "{$HOLLAA}",  amount: "{ 100 }" },
+						] }
+					},
 					{ 
 						app: "state", state: "{
 						// for each AA we want to keep:
-							var[$key||"owner"] = trigger.address; // only user allow to update the AA
-							var[$key||"last_version_number"] = $version; 
-							var[$key||"last_version"] = $aa_address;
-							var[$key||"popular_version"] = $popular_version otherwise $aa_address;
-							var[$key||"popular_version_number"] = $popular_version_number otherwise $version;
+							var[$name||"_owner"] = trigger.address; // only user allow to update the AA
+							var[$name||"_last_version_number"] = $version_number; 
+							var[$name||"_popular_version_number"] = $popular_version_number otherwise $version_number;
 						// for each version we want to keep
-							var[$key||$version||"_address"] = $aa_address;
-							var[$key||$version||"_likes"] = 0;
-							var[$key||$version||"_dislikes"] = 0;
-							var[$key||$version||"_date"] = timestamp_to_string(timestamp);
-						// response
-							response['message'] = "New version of your aa has been registered ^^";
+							var[$version_name||"_address"] = trigger.data.address;
+							var[$version_name||"_likes"] = 1;
+							var[$version_name||"_dislikes"] = 0;
+							var[$version_name||"_date"] = timestamp_to_string(timestamp);
+						// response to show some information in the unit that triggered the AA
+							response['message'] = "New version of your AA has been registered ^^";
 						}"
 					}
 				]
 			},
-			{ if: "{ !!$like or !!$dislike}",
+			{ if: "{ !!trigger.data.like or !!trigger.data.dislike}", // use by user to vote or downvote the AA or AA versions
 				init: "{ 
-					if (attestation[[attestors=$ATTESTATOR, address=trigger.address, ifnone=false]] == false)
-						bounce ("To like or dislike you must be attested by "||$ATTESTATOR);
-					$version = $aa_version otherwise bounce ("Please specify 'version'");
-					if (!var[$key||$version||"_address"])
-						bounce ($key||$version||" do not exist !");
+					// check that the voter is attested
+						if (attestation[[attestors=$ATTESTATOR, address=trigger.address, ifnone=false]] == false)
+							bounce ("To like or dislike you must be attested by "||$ATTESTATOR);
+					// check that the version is provided
+						$version_number = trigger.data.version otherwise
+							bounce ("Please specify 'version'");
+					// get voted version full name
+						$voted_version_name =  $name||"_"||$version_number;
+					// check that the version provided exists
+						if (!var[$voted_version_name||"_address"])
+							bounce ($voted_version_name||" do not exist !");
+					// check if the voter never votes for this version
+						if (!!var[$HOLLAA][$voted_version_name||"_voters_"||trigger.address])
+							bounce ("Cannot vote twice!");
 				}",
 				messages: [
-					{ // payment application (one per asset)
+					 { // send info to HOLLAA to store the list of voters
+                        app: 'data', payload: {
+                            list_name: `{ $voted_version_name||"_voters" }`,
+                            add: `{ trigger.address }`, value: `{ !!trigger.data.like ? "+1" : "-1" }`
+                        },
+                    },
+					{ // bounce max money, thanks for voting
 						app: 'payment', payload: { asset: "base", outputs: [     
 							{ address: "{trigger.address}",  amount: "{ trigger.output[[asset=base]]-1000 }" },
 						] }
@@ -82,15 +106,15 @@ Agent address: ZZVAKHT4PHCHGM5HAKVTJIQQ5GJJGGSQ
 					{ 
 						app: "state", state: "{
 							// proceed voting
-								if ($b_want_to_like) var[$key||$version||"_likes"] +=1;
-								if ($b_want_to_dislike) var[$key||$version||"_dislikes"] -=1;
+								if (trigger.data.like) var[$voted_version_name||"_likes"] += 1;
+								if (trigger.data.dislike) var[$voted_version_name||"_dislikes"] += 1;
 							// check if it became the most popular version
-								if (var[$key||$version||"_likes"] > var[$key||$popular_version_number||"_likes"])
-								{
-									var[$key||"popular_version_number"] = var[$key||$version];
-									var[$key||"popular_version"] = var[$key||$version||"_address"];
-								}
-							response['message'] = "You vote has been taken into account ^^ ";
+                                $voted_version_score = var[$voted_version_name||"_likes"] - var[$voted_version_name||"_dislikes"];
+                                $popular_version_score = var[$name||"_"||$popular_version_number||"_likes"] - var[$name||"_"||$popular_version_number||"_dislikes"];
+								if ($voted_version_score > $popular_version_score)
+									var[$name||"_popular_version_number"] = $version_number;
+							// add info in the unit as feedback
+								response['message'] = "Your vote has been taken into account ^^ ";
 						}"
 					}
 				]
